@@ -1,0 +1,260 @@
+/api/location:
+  post:
+    name: Create a new Location
+    summary: creates a new location record
+    tags:
+      - Location
+    security:
+      - bearerAuth: []
+    requestBody:
+      $ref: "#components/requestBody/Post1Location"
+    responses:
+      201:
+        description: Location object.
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/LocationResponse"
+      401:
+        $ref: "#components/responses/401Unauthorized"
+      400:
+        $ref: "#components/responses/400BadRequest"
+  get:
+    name: Get all locations matching filter object and sorted
+    summary: All the locations with matching filter and sorted with desirable sorting
+    tags:
+      - Location
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: "#/components/parameters/filter"
+      - $ref: "#/components/parameters/sort"
+      - $ref: "#/components/parameters/skip"
+      - $ref: "#/components/parameters/limit"
+    responses:
+      201:
+        $ref: "#components/responses/ArrayOfLocations"
+      401:
+        $ref: "#components/responses/401Unauthorized"
+      400:
+        $ref: "#components/responses/400BadRequest"
+  delete:
+    name: Delete a location
+    summary: deletes an existing location
+    tags:
+      - Location
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: "#/components/parameters/locationId"
+    responses:
+      201:
+        $ref: "#components/responses/SuccessDeletion"
+      401:
+        $ref: "#components/responses/401Unauthorized"
+      400:
+        $ref: "#components/responses/400BadRequest"
+      404:
+        $ref: "#components/responses/404NotFound"
+  put:
+    name: Update a location
+    summary: Updates an existing location
+    tags:
+      - Location
+    security:
+      - bearerAuth: []
+    requestBody:
+      $ref: "#components/requestBody/PutLocation"
+    parameters:
+      - $ref: "#/components/parameters/locationId"
+    responses:
+      201:
+        description: Location object after update.
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/LocationResponse"
+      401:
+        $ref: "#components/responses/401Unauthorized"
+      400:
+        $ref: "#components/responses/400BadRequest"
+      404:
+        $ref: "#components/responses/404NotFound"
+
+/api/location/multiple:
+  delete:
+    name: Delete multiple locations
+    summary: deletes array of locations
+    tags:
+      - Location
+    security:
+      - bearerAuth: []
+    requestBody:
+      $ref: "#components/requestBody/multipleDeleteLocations"
+    responses:
+      201:
+        $ref: "#components/responses/SuccessDeletion"
+      401:
+        $ref: "#components/responses/401Unauthorized"
+      400:
+        $ref: "#components/responses/400BadRequest"
+      404:
+        $ref: "#components/responses/404NotFound"
+/api/location/details:
+  get:
+    name: View detailed location
+    summary: send a location
+    tags:
+      - Location
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/locationId'
+    responses:
+      '201':
+        description: Location details
+      '404':
+        description: Location not found
+
+components:
+  requestBody:
+    Post1Location:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#components/schemas/Location"
+    PutLocation:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#components/schemas/Location"
+    multipleDeleteLocations:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#definitions/LocationsIds"
+    
+  parameters:
+    filter:
+      name: filter
+      description: Choose field as key and value is wanted match or object for range match
+      in: query
+      schema:
+      type: object
+    sort:
+      name: sorts
+      description: Choose field as key and value is either 1 for ascending or -1 for descending
+      in: query
+      schema:
+      type: object
+    limit:
+      name: limit
+      description: Limited returned record 0 to get all records
+      in: query
+      schema:
+      type: number
+    skip:
+      name: skip
+      description: number of records to skip
+      in: query
+      schema:
+      type: number
+    FieldName:
+      name: fieldName
+      in: query
+      required: true
+      schema:
+      type: string
+    NewFieldName:
+      name: newFieldName
+      in: query
+      required: true
+      schema:
+      type: string
+    locationId:
+      name: locationId
+      in: query
+      required: true
+      schema:
+        type: string
+    textSearch:
+      name: textSearch
+      in: query
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    Location:
+      type: object
+      properties:
+        user:
+          type: string
+        temp:
+          type: number
+        coordinate:
+          type: object
+          properties:
+            lat: 
+              type: string
+            lng: 
+              type: string
+        
+    LocationResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: uuid
+        user:
+          type: string
+        temp:
+          type: number
+        coordinate:
+          type: object
+          properties:
+            lat: 
+              type: string
+            lng: 
+              type: string
+
+  responses:
+    401Unauthorized:
+      description: user is unauthorized to create new location
+    400BadRequest:
+      description: request has missing or wrong parameters
+    404NotFound:
+      description: Location object not found
+    SuccessDeletion:
+      description: Location objects is deleted successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                default: "true"
+
+    ArrayOfLocations:
+      description: Array of Location objects.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#components/schemas/LocationResponse"
+definitions:
+  LocationsIds:
+    required: true
+    type: object
+    properties:
+      locationsIds:
+        required: true
+        type: array
+        items:
+          type: string
+  
